@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package progress;
+
+service ProgressService {
+  rpc InitProgress        (InitProgressRequest)    returns (ProgressResponse);
+  rpc UpdateProgress      (UpdateProgressRequest)  returns (ProgressResponse);
+  rpc GetProgress         (GetProgressRequest)     returns (ProgressResponse);
+  rpc GetAllProgress      (UserProgressRequest)    returns (ProgressList);
+  rpc CompleteLesson      (CompleteLessonRequest)  returns (ProgressResponse);
+  rpc GenerateCertificate (CertificateRequest)     returns (CertificateResponse);
+}
+
+message InitProgressRequest {
+  string user_id   = 1;
+  string course_id = 2;
+}
+
+message UpdateProgressRequest {
+  string user_id     = 1;
+  string course_id   = 2;
+  float  percentage  = 3;
+}
+
+message GetProgressRequest {
+  string user_id   = 1;
+  string course_id = 2;
+}
+
+message UserProgressRequest {
+  string user_id = 1;
+}
+
+message CompleteLessonRequest {
+  string user_id    = 1;
+  string course_id  = 2;
+  string lesson_id  = 3;
+}
+
+message CertificateRequest {
+  string user_id   = 1;
+  string course_id = 2;
+}
+
+message ProgressResponse {
+  string user_id            = 1;
+  string course_id          = 2;
+  float  percentage         = 3;
+  repeated string completed_lessons = 4;
+  string last_activity      = 5;
+  bool   is_completed       = 6;
+  string error              = 7;
+}
+
+message ProgressList {
+  repeated ProgressResponse progress_list = 1;
+  string error                            = 2;
+}
+
+message CertificateResponse {
+  string certificate_id = 1;
+  string user_id        = 2;
+  string course_id      = 3;
+  string issued_at      = 4;
+  bool   success        = 5;
+  string error          = 6;
+}
