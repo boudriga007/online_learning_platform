@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+
+  # ── Zookeeper (requis par Kafka) ─────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  # ── Kafka Broker ─────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # ── User Service ─────────────────────────────────────
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      GRPC_PORT: 50051
+      JWT_SECRET: super_secret_key_2025
+      DB_PATH: ./src/db/users.db
+      KAFKA_BROKER: kafka:29092
+    ports:
+      - "50051:50051"
+    volumes:
+      - user-db:/app/src/db
+      - ./proto:/proto
+
+  # ── Course Service ────────────────────────────────────
+  course-service:
+    build: ./course-service
+    container_name: course-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      GRPC_PORT: 50052
+      DB_PATH: ./src/db/courses.db
+      KAFKA_BROKER: kafka:29092
+    ports:
+      - "50052:50052"
+    volumes:
+      - course-db:/app/src/db
+      - ./proto:/proto
+
+  # ── Progress Service ──────────────────────────────────
+  progress-service:
+    build: ./progress-service
+    container_name: progress-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      GRPC_PORT: 50053
+      DB_PATH: ./src/db/progress_db
+      KAFKA_BROKER: kafka:29092
+    ports:
+      - "50053:50053"
+    volumes:
+      - ./proto:/proto
+
+  # ── API Gateway ───────────────────────────────────────
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    depends_on:
+      - user-service
+      - course-service
+      - progress-service
+    environment:
+      PORT: 3000
+      GRPC_USER_SERVICE: user-service:50051
+      GRPC_COURSE_SERVICE: course-service:50052
+      GRPC_PROGRESS_SERVICE: progress-service:50053
+      JWT_SECRET: super_secret_key_2025
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./proto:/proto
+
+volumes:
+  user-db:
+  course-db:

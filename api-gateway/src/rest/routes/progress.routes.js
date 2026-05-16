@@ -68,5 +68,18 @@ router.post('/:userId/:courseId/certificate', authMiddleware, async (req, res) =
     res.status(400).json({ error: err.message });
   }
 });
+// POST /progress/:userId/:courseId/init
+router.post('/:userId/:courseId/init', authMiddleware, async (req, res) => {
+  try {
+    const result = await progressClient.initProgress({
+      user_id:   req.params.userId,
+      course_id: req.params.courseId,
+    });
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 
 module.exports = router;
