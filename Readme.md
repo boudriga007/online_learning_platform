@@ -27,10 +27,9 @@ Développée avec Node.js · gRPC · Kafka · REST · GraphQL · Docker
 6. [Schéma GraphQL](#-schéma-graphql)
 7. [Topics Kafka](#-topics-kafka)
 8. [Bases de données](#-bases-de-données)
-9. [Client web](#-client-web)
-10. [Installation et exécution](#-installation-et-exécution)
-11. [Tests Postman](#-tests-postman)
-12. [Structure du projet](#-structure-du-projet)
+9. [Installation et exécution](#-installation-et-exécution)
+10. [Tests Postman](#-tests-postman)
+11. [Structure du projet](#-structure-du-projet)
 
 ---
 
@@ -674,23 +673,6 @@ CREATE TABLE enrollments (
 
 ---
 
-## 🖥️ Client web
-
-Une interface web complète est disponible dans le dossier `client/`.
-
-**Fonctionnalités :**
-- Dashboard avec statistiques (cours disponibles, inscriptions, cours complétés)
-- Inscription et connexion (JWT automatiquement géré)
-- Parcourir et filtrer les cours
-- S'inscrire aux cours en un clic
-- Créer des cours et des leçons
-- Suivre sa progression avec barres de progression visuelles
-- Générer des certificats
-- GraphQL Explorer intégré (queries et mutations)
-
-**Accès :** Ouvrir `client/index.html` dans le navigateur avec le projet lancé.
-
----
 
 ## 🚀 Installation et exécution
 
